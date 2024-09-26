@@ -3,8 +3,29 @@ import { FlatList, StyleSheet } from 'react-native';
 import { HelloWave } from '@/components/HelloWave';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { useEffect, useState } from 'react';
 
 export default function HomeScreen() {
+
+  const [isLoading, setLoading] = useState(true);
+  const [data, setData] = useState([{"title": "loading ..."}]);
+
+  const getMovies = async () => {
+    try {
+      const response = await fetch('https://reactnative.dev/movies.json');
+      const json = await response.json();
+      setData(json.movies);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getMovies();
+  }, []);
+
   return (
     <ThemedView>
       <ThemedView style={styles.titleContainer}>
@@ -12,14 +33,10 @@ export default function HomeScreen() {
         <HelloWave />
       </ThemedView>
       <ThemedText type="defaultSemiBold">List of Movies</ThemedText>
-      <FlatList
-        data={[
-          {key: 'Princess Bride'},
-          {key: 'Dan In Real Life'},
-          {key: 'Mary Poppins'},
-        ]}
-        renderItem={({item}) => <ThemedText>{item.key}</ThemedText>}
-      />
+      {data && <FlatList
+        data={data}
+        renderItem={({ item }) => <ThemedText>{item.title}</ThemedText>}
+      />}
     </ThemedView>
   );
 }
